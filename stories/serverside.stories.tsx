@@ -7,7 +7,7 @@ import { IMultiselectProps } from "../src/multiselect/interface";
 import { useLazyQuery, gql } from "@apollo/client";
 
 export default {
-  title: "Multiselect Serverside",
+  title: "Multiselect Server",
   component: MultiSelect,
 } as ComponentMeta<typeof MultiSelect>;
 
@@ -30,7 +30,6 @@ export const Serverside = () => {
 };
 
 const AsynchronousLoading = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const GET_DATA = gql`
     query Characters($name: String!) {
       characters(filter: { name: $name }) {
@@ -42,6 +41,10 @@ const AsynchronousLoading = () => {
           status
           gender
           image
+          type
+          episode {
+            id
+          }
         }
       }
       location(id: 1) {
@@ -55,7 +58,7 @@ const AsynchronousLoading = () => {
 
   const [getCharacterData, { loading, error, data }] = useLazyQuery(GET_DATA);
   const handleSearch = (value: string) => {
-    if (value.length >= 3) {
+    if (value.length == 3) {
       getCharacterData({ variables: { name: value } });
     }
     console.log(value);

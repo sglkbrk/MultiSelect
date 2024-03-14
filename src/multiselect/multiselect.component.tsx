@@ -333,12 +333,15 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
               <img className="avatar" src={option["image"]} alt="Avatar" />
               <div className={`optionText`}>
                 <div
-                  className={`variableName`}
+                  className={`displayValue`}
                   dangerouslySetInnerHTML={{
                     __html: this.searchValueColorAndBold(option[variableName]),
                   }}
                 />
-                <p style={{ fontSize: 18 }}> Position</p>
+                <p style={{ fontSize: 18 }}>
+                  {" "}
+                  {option["episode"].length} Episodes
+                </p>
               </div>
             </div>
           </div>
@@ -351,7 +354,7 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
     const regex = new RegExp(inputValue, "gi");
     var newText = text.replace(
       regex,
-      "<span style='font-weight: bold'>" + inputValue + "</span>"
+      "<span class='displayValue' style='font-weight: bold'>" + "$&" + "</span>"
     );
     return newText;
   }
