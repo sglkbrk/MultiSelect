@@ -62,10 +62,10 @@ const AsynchronousLoading = () => {
   };
   return (
     <MultiSelect
-      options={data?.characters ? data.characters.results : []}
+      items={data?.characters ? data.characters.results : []}
       onSearch={handleSearch}
       loading={loading}
-      displayValue="name"
+      variableName="name"
     />
   );
 };

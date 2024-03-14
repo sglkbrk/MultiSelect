@@ -32,11 +32,11 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
     super(props);
     this.state = {
       inputValue: "",
-      options: props.options,
-      filteredOptions: props.options,
-      unfilteredOptions: props.options,
-      selectedValues: Object.assign([], props.selectedValues),
-      preSelectedValues: Object.assign([], props.selectedValues),
+      items: props.items,
+      filteredOptions: props.items,
+      unfilteredOptions: props.items,
+      selectedItems: Object.assign([], props.selectedItems),
+      preSelectedValues: Object.assign([], props.selectedItems),
       toggleOptionsList: false,
       highlightOption: 0,
       groupedObject: [],
@@ -52,14 +52,13 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
     this.renderMultiselectContainer =
       this.renderMultiselectContainer.bind(this);
     this.renderSelectedList = this.renderSelectedList.bind(this);
-    this.searchValueColor = this.searchValueColor.bind(this);
+    this.searchValueColorAndBold = this.searchValueColorAndBold.bind(this);
     this.onRemoveSelectedItem = this.onRemoveSelectedItem.bind(this);
     this.toggelOptionList = this.toggelOptionList.bind(this);
     this.onArrowKeyNavigation = this.onArrowKeyNavigation.bind(this);
     this.onSelectItem = this.onSelectItem.bind(this);
     this.filterOptionsInput = this.filterOptionsInput.bind(this);
-    this.removeSelectedValuesFromOptions =
-      this.removeSelectedValuesFromOptions.bind(this);
+    this.removeSelectedValues = this.removeSelectedValues.bind(this);
     this.isSelectedValue = this.isSelectedValue.bind(this);
     this.fadeOutSelection = this.fadeOutSelection.bind(this);
     this.isDisablePreSelectedValues =
@@ -75,7 +74,7 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   initialSetValue() {
-    this.removeSelectedValuesFromOptions(false);
+    this.removeSelectedValues(false);
   }
 
   resetSelectedValues() {
@@ -83,9 +82,9 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
     return new Promise((resolve) => {
       this.setState(
         {
-          selectedValues: [],
+          selectedItems: [],
           preSelectedValues: [],
-          options: unfilteredOptions,
+          items: unfilteredOptions,
           filteredOptions: unfilteredOptions,
         },
         () => {
@@ -97,11 +96,11 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   getSelectedItems() {
-    return this.state.selectedValues;
+    return this.state.selectedItems;
   }
 
   getSelectedItemsCount() {
-    return this.state.selectedValues.length;
+    return this.state.selectedItems.length;
   }
 
   componentDidMount() {
@@ -110,20 +109,19 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   componentDidUpdate(prevProps) {
-    const { options, selectedValues } = this.props;
-    const { options: prevOptions, selectedValues: prevSelectedvalues } =
-      prevProps;
-    if (JSON.stringify(prevOptions) !== JSON.stringify(options)) {
+    const { items, selectedItems } = this.props;
+    const { items: prevOptions, selectedItems: prevSelectedvalues } = prevProps;
+    if (JSON.stringify(prevOptions) !== JSON.stringify(items)) {
       this.setState(
-        { options, filteredOptions: options, unfilteredOptions: options },
+        { items, filteredOptions: items, unfilteredOptions: items },
         this.initialSetValue
       );
     }
-    if (JSON.stringify(prevSelectedvalues) !== JSON.stringify(selectedValues)) {
+    if (JSON.stringify(prevSelectedvalues) !== JSON.stringify(selectedItems)) {
       this.setState(
         {
-          selectedValues: Object.assign([], selectedValues),
-          preSelectedValues: Object.assign([], selectedValues),
+          selectedItems: Object.assign([], selectedItems),
+          preSelectedValues: Object.assign([], selectedItems),
         },
         this.initialSetValue
       );
@@ -144,22 +142,22 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
     );
   }
 
-  removeSelectedValuesFromOptions(skipCheck) {
-    const { displayValue } = this.props;
-    const { selectedValues = [], unfilteredOptions, options } = this.state;
-    if (!selectedValues.length && !skipCheck) {
+  removeSelectedValues(bool) {
+    const { variableName } = this.props;
+    const { selectedItems = [], unfilteredOptions } = this.state;
+    if (!selectedItems.length && !bool) {
       return;
     }
     if (true) {
       let optionList = unfilteredOptions.filter((item) => {
-        return selectedValues.findIndex(
-          (v) => v[displayValue] === item[displayValue]
+        return selectedItems.findIndex(
+          (v) => v[variableName] === item[variableName]
         ) === -1
           ? true
           : false;
       });
       this.setState(
-        { options: optionList, filteredOptions: optionList },
+        { items: optionList, filteredOptions: optionList },
         this.filterOptionsInput
       );
       return;
@@ -182,12 +180,12 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   filterOptionsInput() {
-    let { options, filteredOptions, inputValue } = this.state;
-    const { displayValue } = this.props;
-    options = filteredOptions.filter((i) =>
-      this.matchValues(i[displayValue], inputValue)
+    let { items, filteredOptions, inputValue } = this.state;
+    const { variableName } = this.props;
+    items = filteredOptions.filter((i) =>
+      this.matchValues(i[variableName], inputValue)
     );
-    this.setState({ options });
+    this.setState({ items });
   }
 
   matchValues(value, search) {
@@ -198,22 +196,16 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   // Ok Tuşuyla Gezinme
   onArrowKeyNavigation(e) {
     const {
-      options,
+      items,
       highlightOption,
       toggleOptionsList,
       inputValue,
-      selectedValues,
+      selectedItems,
     } = this.state;
-    const { disablePreSelectedValues } = this.props;
-    if (
-      e.keyCode === 8 &&
-      !inputValue &&
-      !disablePreSelectedValues &&
-      selectedValues.length
-    ) {
-      this.onRemoveSelectedItem(selectedValues.length - 1);
+    if (e.keyCode === 8 && !inputValue && selectedItems.length) {
+      this.onRemoveSelectedItem(selectedItems.length - 1);
     }
-    if (!options.length) {
+    if (!items.length) {
       return;
     }
     if (e.keyCode === 38) {
@@ -222,21 +214,21 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
           highlightOption: previousState.highlightOption - 1,
         }));
       } else {
-        this.setState({ highlightOption: options.length - 1 });
+        this.setState({ highlightOption: items.length - 1 });
       }
     } else if (e.keyCode === 40) {
-      if (highlightOption < options.length - 1) {
+      if (highlightOption < items.length - 1) {
         this.setState((previousState) => ({
           highlightOption: previousState.highlightOption + 1,
         }));
       } else {
         this.setState({ highlightOption: 0 });
       }
-    } else if (e.key === "Enter" && options.length && toggleOptionsList) {
+    } else if (e.key === "Enter" && items.length && toggleOptionsList) {
       if (highlightOption === -1) {
         return;
       }
-      this.onSelectItem(options[highlightOption]);
+      this.onSelectItem(items[highlightOption]);
     }
     setTimeout(() => {
       const element = document.querySelector("ul.optionContainer .highlight");
@@ -247,19 +239,19 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   onRemoveSelectedItem(item) {
-    let { selectedValues, index = 0 } = this.state;
-    const { onRemove, displayValue } = this.props;
-    index = selectedValues.findIndex(
-      (i) => i[displayValue] === item[displayValue]
+    let { selectedItems, index = 0 } = this.state;
+    const { onRemove, variableName } = this.props;
+    index = selectedItems.findIndex(
+      (i) => i[variableName] === item[variableName]
     );
-    selectedValues.splice(index, 1);
-    onRemove(selectedValues, item);
-    this.setState({ selectedValues }, () => {});
+    selectedItems.splice(index, 1);
+    onRemove(selectedItems, item);
+    this.setState({ selectedItems }, () => {});
   }
 
   onSelectItem(item) {
-    const { selectedValues } = this.state;
-    const { selectionLimit, onSelect } = this.props;
+    const { selectedItems } = this.state;
+    const { selectionMaxLimit, onSelect } = this.props;
     // TODO: Parameterize
     if (true) {
       this.setState({
@@ -270,28 +262,28 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
       this.onRemoveSelectedItem(item);
       return;
     }
-    if (selectionLimit == selectedValues.length) {
+    if (selectionMaxLimit == selectedItems.length) {
       return;
     }
-    selectedValues.push(item);
-    onSelect(selectedValues, item);
-    this.setState({ selectedValues }, () => {
+    selectedItems.push(item);
+    onSelect(selectedItems, item);
+    this.setState({ selectedItems }, () => {
       this.filterOptionsInput();
     });
   }
 
   isSelectedValue(item) {
-    const { displayValue } = this.props;
-    const { selectedValues } = this.state;
+    const { variableName } = this.props;
+    const { selectedItems } = this.state;
     return (
-      selectedValues.filter((i) => i[displayValue] === item[displayValue])
+      selectedItems.filter((i) => i[variableName] === item[variableName])
         .length > 0
     );
   }
 
   renderList() {
     const { nodata, loading, loadingMessage = "loading..." } = this.props;
-    const { options } = this.state;
+    const { items } = this.state;
     if (loading) {
       return (
         <ul className={`optionContainer`}>
@@ -304,16 +296,16 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
     }
     return (
       <ul className={`optionContainer`}>
-        {options.length === 0 && <span className={`notFound`}>{nodata}</span>}
+        {items.length === 0 && <span className={`notFound`}>{nodata}</span>}
         {this.renderOption()}
       </ul>
     );
   }
 
   renderOption() {
-    const { displayValue } = this.props;
+    const { variableName } = this.props;
     const { highlightOption } = this.state;
-    return this.state.options.map((option, i) => {
+    return this.state.items.map((option, i) => {
       const isSelected = this.isSelectedValue(option);
       return (
         <li
@@ -341,9 +333,9 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
               <img className="avatar" src={option["image"]} alt="Avatar" />
               <div className={`optionText`}>
                 <div
-                  className={`displayValue`}
+                  className={`variableName`}
                   dangerouslySetInnerHTML={{
-                    __html: this.searchValueColor(option[displayValue]),
+                    __html: this.searchValueColorAndBold(option[variableName]),
                   }}
                 />
                 <p style={{ fontSize: 18 }}> Position</p>
@@ -354,7 +346,7 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
       );
     });
   }
-  searchValueColor(text) {
+  searchValueColorAndBold(text) {
     const inputValue = this.state.inputValue;
     const regex = new RegExp(inputValue, "gi");
     var newText = text.replace(
@@ -365,16 +357,16 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   renderSelectedList() {
-    const { displayValue } = this.props;
-    const { selectedValues, closeIconType } = this.state;
-    return selectedValues.map((value, index) => (
+    const { variableName } = this.props;
+    const { selectedItems, closeIconType } = this.state;
+    return selectedItems.map((value, index) => (
       <span
         className={`chip  ${
           this.isDisablePreSelectedValues(value) && "disableSelection"
         }`}
         key={index}
       >
-        {value[displayValue]}
+        {value[variableName]}
         {!this.isDisablePreSelectedValues(value) && (
           <img
             className="icon_cancel closeIcon"
@@ -387,27 +379,27 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   isDisablePreSelectedValues(value) {
-    const { disablePreSelectedValues, displayValue } = this.props;
+    const { variableName } = this.props;
     const { preSelectedValues } = this.state;
-    if (!disablePreSelectedValues || !preSelectedValues.length) {
+    if (!preSelectedValues.length) {
       return false;
     }
     return (
-      preSelectedValues.filter((i) => i[displayValue] === value[displayValue])
+      preSelectedValues.filter((i) => i[variableName] === value[variableName])
         .length > 0
     );
   }
 
   fadeOutSelection(item) {
-    const { selectionLimit } = this.props;
-    const { selectedValues } = this.state;
-    if (selectionLimit == -1) {
+    const { selectionMaxLimit } = this.props;
+    const { selectedItems } = this.state;
+    if (selectionMaxLimit == -1) {
       return false;
     }
-    if (selectionLimit != selectedValues.length) {
+    if (selectionMaxLimit != selectedItems.length) {
       return false;
     }
-    if (selectionLimit == selectedValues.length) {
+    if (selectionMaxLimit == selectedItems.length) {
       if (!true) {
         return true;
       } else {
@@ -469,7 +461,7 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
   }
 
   renderMultiselectContainer() {
-    const { inputValue, toggleOptionsList, selectedValues } = this.state;
+    const { inputValue, toggleOptionsList, selectedItems } = this.state;
     const { placeholder, id } = this.props;
     return (
       <div
@@ -522,11 +514,10 @@ export class Multiselect extends React.Component<IMultiselectProps, any> {
 }
 
 Multiselect.defaultProps = {
-  options: [],
-  disablePreSelectedValues: false,
-  selectedValues: [],
-  displayValue: "Key",
-  selectionLimit: -1,
+  items: [],
+  selectedItems: [],
+  variableName: "Key",
+  selectionMaxLimit: -1,
   placeholder: "Select",
   nodatamsg: "No Options Available",
   onSelect: () => {},

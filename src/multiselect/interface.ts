@@ -2,11 +2,10 @@ import React from "react";
 
 export interface IMultiselectProps {
   id?: string;
-  options: any;
-  disablePreSelectedValues?: boolean;
-  selectedValues?: any;
-  displayValue?: string;
-  selectionLimit?: any;
+  items: any;
+  selectedItems?: any;
+  variableName?: string;
+  selectionMaxLimit?: any;
   placeholder?: string;
   loading?: boolean;
   nodatamsg?: string;

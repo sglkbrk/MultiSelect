@@ -14,6 +14,6 @@ const Template: Story<IMultiselectProps> = (args) => <MultiSelect {...args} />;
 
 export const BasicItems = Template.bind({});
 BasicItems.args = {
-  options: items,
-  displayValue: "key",
+  items: items,
+  variableName: "key",
 };
